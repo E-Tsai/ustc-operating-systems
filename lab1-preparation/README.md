@@ -94,9 +94,11 @@ Prepare a simple c program (`hello.c`).
 ```c
 #include<stdio.h>
 int main(int argc,  const char ** argv){    
+    printf("\033[1;32m");
     while(1){
-        printf("hello world!\n");
+        printf("Hello world!\n");
     }
+    printf("\033[0m;");
     return 0;
 }
 ```
@@ -172,7 +174,7 @@ Now we a kernel image and  `initramfs_data*` under `linux-4.17-rc2/usr`.
 **Run Linux kernel on qemu**  
 
 ```shell
-qemu-system-x86_64 -kernel arch/x86/boot/bzImage -initrd usr/initramfs_data.cpio.gz -append "root=/dev/ram init=/init"
+qemu-system-x86_64 -kernel arch/x86/boot/bzImage -initrd usr/initramfs_data.cpio.gz -append "root=/dev/ram rdinit=/init"
 ```
 
 ### [Boot with grub](https://www.linuxjournal.com/article/4622) 
@@ -226,6 +228,70 @@ sudo fdisk /dev/loop3
 ```
 
 > fdisk - a command-line utility that provides disk partitioning functions. **p**: print the partition table; **n**: create a new partition; **d**: delete a partition; **q**: quit without saving changes; **w**: write the new partition table and exit.
+
+Detach 32M.img
+
+```shell
+sudo losetup -d /dev/loop3
+```
+
+
+
+```shell
+sudo losetup -o 32256 /dev/loop3 32M.img
+```
+
+
+
+```shell
+sudo mke2fs /dev/loop28
+```
+
+You'll see something like:
+
+```shell
+mke2fs 1.44.1 (24-Mar-2018)
+Discarding device blocks: done                            
+Creating filesystem with 32736 1k blocks and 8192 inodes
+Filesystem UUID: 7e718849-86b6-4500-a741-28f1b167d272
+Superblock backups stored on blocks: 
+	8193, 24577
+
+Allocating group tables: done                            
+Writing inode tables: done                            
+Writing superblocks and filesystem accounting information: done
+```
+
+```shell
+sudo mount /dev/loop3 rootfs
+```
+
+
+
+```shell
+sudo mkdir rootfs/boot
+sudo mkdir rootfs/boot/grub
+sudo cp ./grub-0.97-i386-pc/boot/grub/* rootfs/boot/grub
+```
+
+
+
+```shell
+default 0
+timeout 30
+title linux on 32M.img
+root (hd0,0)
+kernel (hd0,0)/bzImage root=/dev/ram init=/bin/ash
+initrd (hd0,0)/initramfs_data.cpio.gz
+```
+
+
+
+```shell
+qemu-system-x86_64 -boot a -fda a.img -hda 32M.img
+```
+
+
 
 ## References
 

@@ -28,9 +28,9 @@
 # sudo mknod rootfs/dev/ram b 1 0
 
 # # Reconfigure
-# cd linux-4.17-rc2
+cd linux-4.17-rc2
 # make menuconfig
-# sudo make -j$(nproc)
+sudo make -j$(nproc)
 
 # # Run on qemu
 qemu-system-x86_64 -kernel arch/x86/boot/bzImage -initrd usr/initramfs_data.cpio.gz -append "root=/dev/ram init=/init"
