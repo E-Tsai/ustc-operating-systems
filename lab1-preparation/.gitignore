@@ -1,0 +1,7 @@
+grub*
+linux-4.17-rc2*
+myinitrd4M.img
+a.img
+rootfs
+init
+32M.img
