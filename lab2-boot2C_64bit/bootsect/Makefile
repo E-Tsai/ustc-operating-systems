@@ -1,0 +1,13 @@
+BOOTSECT=bootsect/start16
+OUTPUT=output
+BOOTSECT_OBJS=${OUTPUT}/${BOOTSECT}.o
+BOOTSECT_BIN=${OUTPUT}/${BOOTSECT}.bin
+
+${OUTPUT}/${BOOTSECT}.o: ${BOOTSECT}.S
+	gcc -c ${ASM_FLAGS} ${BOOTSECT}.S -o ${OUTPUT}/${BOOTSECT}.o	
+
+${OUTPUT}/${BOOTSECT}.bin: ${BOOTSECT_OBJS}
+	@mkdir -p ${OUTPUT}
+	ld -T ${BOOTSECT}.ld ${BOOTSECT_OBJS} -o ${OUTPUT}/${BOOTSECT}.elf
+	objcopy -O binary ${OUTPUT}/${BOOTSECT}.elf ${OUTPUT}/${BOOTSECT}.bin
+	cp ${OUTPUT}/${BOOTSECT}.bin ${OUTPUT}/start16.bin

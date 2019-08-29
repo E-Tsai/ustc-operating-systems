@@ -1,0 +1,8 @@
+1 In subdir myOS, add task.c or other C files for osStart()/task management/schedule
+2 In subdir myOS, in file start32.S, you can add some assembly code here, for example CTX_SW()
+2 In subdir myOS, in file Makefile, add rules to compile files added in step 1
+3 In subdir myOS, add myOS.h (this file name cannot be changed) to list all interface to userApp
+4 Replace userApp with new provided userApp
+
+INTERFACE to userAPP
+myOS/myOS.h

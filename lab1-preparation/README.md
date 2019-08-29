@@ -7,7 +7,14 @@
 Participants are expected to:
 
 - Get a feeling of working on Linux.
-- Understand some basic OS concepts.
+- Understand some basic OS concepts, and be able to answer the following questions:
+  * [What is a kernel?](https://en.wikipedia.org/wiki/Kernel_(operating_system)) 
+  * [What is initial ramdisk? ](https://en.wikipedia.org/wiki/Initial_ramdisk) 
+  * [What is a boot disk?](https://en.wikipedia.org/wiki/Boot_disk) 
+  * [What are block devices?](https://en.wikipedia.org/wiki/Device_file#Block_devices) 
+  * [What is a loop device?](https://en.wikipedia.org/wiki/Loop_device) 
+  * [What is BIOS?](https://en.wikipedia.org/wiki/BIOS) 
+  * [What is MBR?](https://en.wikipedia.org/wiki/Master_boot_record) 
 - Understand the **booting process of Linux kernel**.
 - Learn some **GDB basics**.
 - **Know how to google**.
@@ -200,6 +207,21 @@ Download `grub-0.97-i386-pc.tar.gz` from [here](ftp://alpha.gnu.org/gnu/grub/gru
 ```shell
 tar xvzf grub-0.97-i386-pc.tar.gz
 ```
+
+In this section, we're using the traditional [BIOS](https://en.wikipedia.org/wiki/BIOS)-[MBR](https://en.wikipedia.org/wiki/Master_boot_record) method for power-on startup.
+
+> BIOS (Basic Input/Output System): non-volatile firmware used to perform hardware initialization during the booting process.
+>
+> MBR (Master Boot Record): a special type of boot sector at the very beginning of partitioned computer mass storage devices.
+
+The boot process is broken down into several major components, each of which is a completely-separate subsystem with many different options and variations:
+
+* BIOS: The PC is turned on & the BIOS initializes the hardware.
+* MBR: The BIOS calls code stored in the MBR at the start of disk 0.
+* Active Partition: The MBR loads code from the bootsector of the active partition.
+* Bootloader: The bootsector loads & runs the bootloader from its file systems.
+
+For further reading, please check out [The BIOS/MBR Boot Process](https://neosmart.net/wiki/mbr-boot-process/).
 
 **Build a GRUB boot floppy:**
 
@@ -479,6 +501,10 @@ Now you can list source code at GDB breakpoints or use
 [Kernel Debugging](https://wiki.osdev.org/Kernel_Debugging) 
 
 [A GDB tutorial](https://web.eecs.umich.edu/~sugih/pointers/summary.html) 
+
+[What is BIOS?](https://en.wikipedia.org/wiki/BIOS) 
+
+[What is MBR?](https://en.wikipedia.org/wiki/Master_boot_record) 
 
 [The BIOS/MBR Boot Process](https://neosmart.net/wiki/mbr-boot-process/) 
 

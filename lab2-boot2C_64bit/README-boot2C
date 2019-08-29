@@ -1,0 +1,16 @@
+Dirs and Files
+  subdir bootsect: code for bootsect is here
+	file Makefile: Makefile for this subdir
+	file start16.S: code for bootsect
+	file start16.ld: linker script for bootsect
+  subdir myOS: code for myOS is here
+	file Makefile: Makefile for this subdir
+	file start32.S: basic assembly code for myOS, finally calles userApp/main.c:myMain() 
+	file myOS.ld: linker script for myOS
+  subdir output: all output files are here
+  subdir userApp: code for testing
+	file Makefile: Makefile for this subdir
+	file main.c: provide myMain(), print "hello world" in this version.
+  file Makefile: the main Makefile to generate myOS.bin which includes all code for myOS and userApp
+  file source2img.sh: the shell script to generate all binaries and boot images, and to run qemu
+  file README-*
