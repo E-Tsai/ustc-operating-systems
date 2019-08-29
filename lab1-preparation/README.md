@@ -56,24 +56,20 @@ tar xvzf linux-4.17-rc2.tar.gz
 
 Switch to the kernel directory, check out [configure, make and make install](https://thoughtbot.com/blog/the-magic-behind-configure-make-make-install) to get a better understanding of the following operations.
 
-Check your system version:
-
-```shell
-uname -a
-```
-
-‌...to see if it's 32-bit or 64-bit. Then configure the kernel.
+Then configure the kernel.
 
 For 32-bit systems:
 
 ```shell
 make i386_defconfig
+# use qemu-system-i386 later
 ```
 
 For 64-bit systems:
 
 ```shell
 make x86_64_defconfig
+# use qemu-system-x86_64 later
 ```
 
 Then compile the kernel:
@@ -337,6 +333,8 @@ initrd (hd0,0)/initramfs_data.cpio.gz
 qemu-system-x86_64 -boot a -fda a.img -hda 32M.img
 ```
 
+*hint: What are the roles of `a.img` and `32M.img`?*
+
 **Add GRUB function to the disk image:**
 
 ```shell
@@ -394,7 +392,7 @@ Set break point:
 
 ...it will stop when reached `start_kernel`, waiting for next GDB command.‌
 
-**Reconfigure Linux kernel and compile it with debugging information**
+**Reconfigure Linux kernel and compile it with debugging information**:
 
 ```shell
 make menuconfig
@@ -415,6 +413,8 @@ Now you can list source code at GDB breakpoints or use
 ```
 
 ...to view registers at anytime with this command.
+
+*Congratulations! You have finished the warm-up tutorial :)*
 
 # **References** 
 
