@@ -107,7 +107,7 @@ get_any_key1:
 
 	call	get_key
 
-#在进入保护模式前，先加载OS
+# 在进入保护模式前，先加载OS
 load_img0:
 	movw	$loading_OS_message, %si
 	movb	$WHITE, %ah
@@ -126,7 +126,7 @@ load_ok:
 	movl	$(5*80+13), %edx
 	call	rm_print_string
 
-#进入保护模式
+# 进入保护模式
 to_protect_mode:
 	movw	$to_protect_mode_message, %si
 	movb	$WHITE, %ah

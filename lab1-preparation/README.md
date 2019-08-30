@@ -65,21 +65,21 @@ Switch to the kernel directory, check out [configure, make and make install](htt
 
 Then configure the kernel.
 
-For 32-bit systems:
+To compile a 32-bit system:
 
 ```shell
 make i386_defconfig
 # use qemu-system-i386 later
 ```
 
-For 64-bit systems:
+To compile a 64-bit system:
 
 ```shell
-make x86_64_defconfig
+make x86_64_defconfig	# we're using this configuration
 # use qemu-system-x86_64 later
 ```
 
-Then compile the kernel:
+Compile the kernel:
 
 ```shell
 make -j$(nproc) 
@@ -172,7 +172,7 @@ make menuconfig
 
 Enter the path of `rootfs`. 
 
-*hint: What's the purpose of the modification we made in the `menuconfig`?*
+*hint: What's the purpose of the modifying `menuconfig`?*
 
 Recompile the kernel:
 

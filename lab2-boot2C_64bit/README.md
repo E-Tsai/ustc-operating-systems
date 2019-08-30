@@ -1,4 +1,4 @@
-# Lab 2: A Simple Task Manager
+# Lab 2: Starting From Boot Loader
 
 *A simple OS with a FCFS task manager.*
 
@@ -17,9 +17,11 @@ In the following experiments, we are going to build a simple bootable operating 
   * [Data segment structure](https://en.wikipedia.org/wiki/Data_segment);
   * [Context switch](https://en.wikipedia.org/wiki/Context_switch);
 * Understand the provided code structure and be able to answer the following questions:
-  * What is a Makefile?
-  * What is a [linker](https://en.wikipedia.org/wiki/GNU_linker)?
+  * What is a [compiler](https://en.wikipedia.org/wiki/Compiler)? How does it work?
+  * What is a [Makefile](https://opensource.com/article/18/8/what-how-makefile)? How does it work?
+  * What is a [linker](https://en.wikipedia.org/wiki/GNU_linker)? How does it work?
   * What is a [Executable and Linkable Format (ELF)](https://elinux.org/Executable_and_Linkable_Format_(ELF))?
+  * What is a [IMG](https://en.wikipedia.org/wiki/IMG_(file_format))?
 
 ## Contents
 
@@ -33,7 +35,10 @@ In the following experiments, we are going to build a simple bootable operating 
 * Compile source code into binary.
 * Build a boot floppy.
 * Run with QEMU:
+  
   * file `source2img.sh`: the shell script to generate all binaries and run the boot images on QEMU.
+  
+  We provide a script `source2img.sh` in the root directory which includes all operations. However, do not simply run it without having a look.
 
 ## Requirements
 
@@ -79,6 +84,8 @@ In the following experiments, we are going to build a simple bootable operating 
 
 * Replace old `userApp` with new provided testing code.
 
+* Provide a code diagram for this project.
+
 ## Instructions
 
 ### Environment
@@ -115,9 +122,43 @@ For those who haven't used Makefile before, please check out this [simple Makefi
 
 *hint: add `mkdir -p <filename>` in Makefile can avoid some "No such file or directory" error.*
 
+We provide a compilation diagram of this project:
+
+```
+   bootsect/                    myOS/                  userApp/          
+-------------------------------------------------------------------------- 
+   start16.S            start32.S    task.c        init.c    main.c 
+       |                    |          |             |         |   
+       |                    |          |             |         |          
+   start16.o            start32.o    task.o        init.o    main.o           
+       |                    |          |             |         |            
+       | start16.ld         |          |             |         |            
+       |                    -----------------|------------------  
+  start16.elf                                | myOS.ld        
+       |                                  myOS.elf          
+       |                                     |                
+  start16.bin                             myOS.bin      
+       \                                      /              
+        \                                    /             
+         \             bootloader           /            
+        +------------------------|-----------------------+                    
+        |          MBR           |          OS           |  a_boot2C.img  
+        +------------------------------------------------+             
+       0x7C00                   0x7E00                                                     
+                                                                   
+```
+
+However, we leave it to you to understand the details of the compilation.           
+
+> [Linker](https://en.wikipedia.org/wiki/GNU_linker): creates an [executable file](https://en.wikipedia.org/wiki/Executable_file) (or a [library](https://en.wikipedia.org/wiki/Library_(software))) from [object files](https://en.wikipedia.org/wiki/Object_file) created during [compilation](https://en.wikipedia.org/wiki/Compiler) of a software project.
+>
+> Computer programs typically are composed of several parts or modules; these parts/modules need not all be contained within a single object file, and in such cases refer to each other by means of symbols as addresses into other modules, which are mapped into memory addresses when linked for execution.         
+>
+> [objdump](https://en.wikipedia.org/wiki/Objdump): a command-line program for displaying various information about [object files](https://en.wikipedia.org/wiki/Object_file). For instance, it can be used as a [disassembler](https://en.wikipedia.org/wiki/Disassembler) to view an [executable](https://en.wikipedia.org/wiki/Executable) in assembly form.                          
+
 ### Walk through
 
-**Boot Loader**
+**Boot Loader Stage 1**
 
 Though the boot sector and the transition from real mode to protected mode is provided, we encourage you to take a look at the source code (including the linker) to understand what happens there.
 
@@ -147,7 +188,7 @@ The [MBR](https://en.wikipedia.org/wiki/Master_boot_record) consists of 512 or m
 * 447 - 510 bytes: Partition entry 1 - 4;
 * 511 - 512 bytes: Boot signature (0x55 and 0xaa).
 
-Read contents in `bootsect/Makefile`. Read [GNU linker](https://en.wikipedia.org/wiki/GNU_linker) and [ld (Unix)](https://en.wikipedia.org/wiki/Linker_(computing)) to better understand the operations here.
+Read in `bootsect/Makefile`. Read [GNU linker](https://en.wikipedia.org/wiki/GNU_linker) and [ld (Unix)](https://en.wikipedia.org/wiki/Linker_(computing)) to better understand the operations here.
 
 *hint: explain `0x7C00` and `0x7C00 + 508` in `bootsect/start16.ld`*.
 
@@ -155,23 +196,66 @@ For faster execution speed, stage 2 of the boot loader is usually loaded into RA
 
 Since stage 2 is usually written in C, in addition to the system image, we should also take stack space into consideration. The size of the space is preferably a multiple of the memory page size (usually 4KB). In general, a 1M RAM space is sufficient.
 
+**Boot loader Stage 2 (Entering C)** 
+
 In `myOS/start32.S`, we set up the stack and jump to the C entry point of `userApp/main.c:myMain()`.
+
+*hint: Why do we need to zero out the BSS segment in  `myOS/start32.S`?*
 
 Read [Data segment structure](https://en.wikipedia.org/wiki/Data_segment) to understand the contents of linker script `myOS/start32.ld`. 
 
-*hint: Why do we need to zero out the BSS segment in  `myOS/start32.S`?*
+```
+/*
+ * myOS.ld
+ *
+ * Linker script for the i386 bootsect code
+ */
+OUTPUT_FORMAT("elf32-i386", "elf32-i386", "elf32-i386")
+OUTPUT_ARCH(i386)
+ENTRY(_start)
+
+SECTIONS
+{
+	. = 0x7E00;
+	_text_start = .;
+	.text		: { *(.text*) }
+	
+	. = ALIGN(16);
+	.data		: { *(.data*) }
+	
+	. = ALIGN(16);
+	.bss		:
+	{
+		__bss_start = .;
+		_bss_start = .;
+		*(.bss)
+		__bss_end = .;
+	}
+	. = ALIGN(16);
+	_end = .;
+	. = ALIGN(512);	
+}
+```
+
+*hint: Why does the stage 2 of boot loader start at `0x7E00`?*
 
 You're expected to add assembly code for context switch in `myOS/start32.S`, it should be something like:
 
 ```asm
-CTX_SW:  
-	pusha
-	movl %esp, prevTSK_StackPtr
+.global CTX_SW
+CTX_SW: 
+	pushf 
+  	pusha
+	movl prevTSK_StackPtr,%eax
+	movl %esp, (%eax)
 	movl nextTSK_StackPtr, %esp
 	popa 
+	popf
 	ret
 ```
 
+> [pushf](https://www.felixcloutier.com/x86/pushf:pushfd:pushfq) - pushes the flags register onto the top of the stack.
+>
 > [pusha](http://faydoc.tripod.com/cpu/pusha.htm) - pushes all the general purpose registers onto the stack in the following order: AX, CX, DX, BX, SP, BP, SI, DI.
 >
 > [popa](https://docs.oracle.com/cd/E19455-01/806-3773/instructionset-114/index.html) - This instruction pops all the general purpose registers off the stack in the reverse order of PUSHA.
@@ -185,18 +269,18 @@ void CTX_SW(unsigned long *prevTSK_StackPtr,unsigned long *nextTSK_StackPtr)
 {
 	asm
 	(
+        "pushf\n\t"
 		"pusha\n\t"
 		"movl %%esp, %0\n\t" 
 		"movl %1, %%esp\n\t" 
 		"popa\n\t"
+        "popf\n\t"
 		"ret"
 		:
 		:"m"(prevTSK_StackPtr),"m"(nextTSK_StackPtr)
 	);
 }
 ```
-
-**Entering C**
 
 You are expected to implement TCB in `myOS/task.c`, pseudocode:
 
@@ -213,23 +297,22 @@ Implement  `void osStart(void)` , `int createTsk(void (*tskBody)(void))`, `void 
 
 ```c
 unsigned long* stack;
-int createTsk(void(*task)(void))
-{
-	stack = (stack1[tcb->pid-1]+999);
-	*stack--=(unsigned long)0x08;
-	*stack--=(unsigned long)task;
-	*stack--=(unsigned long)0xAAAAAAAA;
-	*stack--=(unsigned long)0xCCCCCCCC;
-	*stack--=(unsigned long)0xDDDDDDDD;
-	*stack--=(unsigned long)0xBBBBBBBB;
-	*stack--=(unsigned long)0x44444444;
-	*stack--=(unsigned long)0x55555555;
-	*stack--=(unsigned long)0x66666666;
-	*stack= (unsigned long)0x77777777;
-	//dummies for debugging
-	...
+void stack_init(unsigned long** stk,void (*task)(void)){
+  *(*stk)-- = (unsigned long) 0x08;        // CS first 32 bits
+  *(*stk)-- = (unsigned long) task;     // eip
+  *(*stk)-- = (unsigned long) 0xAAAAAAAA;  // EAX 
+  *(*stk)-- = (unsigned long) 0xCCCCCCCC;  // ECX
+  *(*stk)-- = (unsigned long) 0xDDDDDDDD;  // EDX 
+  *(*stk)-- = (unsigned long) 0xBBBBBBBB;  // EBX
+  *(*stk)-- = (unsigned long) 0x44444444;  // ESP
+  *(*stk)-- = (unsigned long) 0x55555555;  // EBP
+  *(*stk)-- = (unsigned long) 0x66666666;  // ESI
+  *(*stk) = (unsigned long) 0x77777777;  // EDI  last 32 bits
+    // dummies for debugging
 }
 ```
+
+*hint: When to initialize a task-specific stack?[The pushf assembly instruction](https://www.felixcloutier.com/x86/pushf:pushfd:pushfq) *
 
 To compile this newly added source code, add the following to `myOS/Makefile`: 
 
@@ -254,11 +337,66 @@ echo "Building boot floppy..."
 sudo dd if=output/start16.bin of=${IMG_NAME} bs=512 count=1
 sudo dd if=output/myOS.bin of=${IMG_NAME} bs=512 seek=1
 
-echo "qemu-system-i386 -fda ${IMG_NAME}"
+echo "qemu-system-i386 -fda ${IMG_NAME}"[The pushf assembly instruction](https://www.felixcloutier.com/x86/pushf:pushfd:pushfq) 
 sudo qemu-system-i386 -fda ${IMG_NAME}
 ```
 
-*hint: Compare it with Boot with GRUB section in lab 1.*
+> The `.img` filename extension is used by disk image files, which contain raw dumps of a magnetic disk or of an optical disc.https://www.ibm.com/developerworks/cn/linux/l-btloader/index.html
+
+*hint: What does `count=1` and `seek=1` imply here?*
+
+*hint: Compare it with Boot with GRUB section in lab 1.* 
+
+### Debugging Tools
+
+**Use hexdump to dump contents of generated object files** 
+
+```shell
+hexdump -C output/start16.bin
+```
+
+> [Hexdump](https://www.geeksforgeeks.org/hexdump-command-in-linux-with-examples/) is a very useful Linux command for developers and application debuggers. It has the ability to dump file contents into many formats like hexadecimal, octal, ASCII and decimal.
+
+*hint: What does the `55 aa` at the end mean?* 
+
+```shell
+hexdump -C output/myOS.bin
+hexdump -C output/a_boot2C.img
+```
+
+**Use GDB to debug** 
+
+```shell
+sudo qemu-system-i386 -fda output/a_boot2C.img -s -S
+```
+
+Then, from another local shell:
+
+```shell
+gdb
+(gdb) file output/myOS.elf
+```
+
+...to read [symbol table](https://www.tutorialspoint.com/compiler_design/compiler_design_symbol_table.htm) of our simple OS.
+
+Add breakpoint, connect to QEMU and continue to run kernel:
+
+```shell
+(gdb) b myMain
+(gdb) target remote:1234
+(gdb) c
+```
+
+Some GDB commands:
+
+* `r/run` - starts the program running under gdb. Note that every time you enter `r`, your program will restart at the beginning.
+* `file` - specifies which program you want to debug.
+* `b/break` - sets break points.
+* `c/continue` -  sets the program running again, after you have stopped it at a breakpoint.
+* `print` - prints out the value of the expression, which could be just a variable name.
+* `bt` - prints a backtrace of the entire stack. 
+* `i r` - `info registers`
+* `watch` - sets watchpoints.
 
 ## References
 
@@ -302,8 +440,24 @@ sudo qemu-system-i386 -fda ${IMG_NAME}
 
 [The popa assembly instruction](https://docs.oracle.com/cd/E19455-01/806-3773/instructionset-114/index.html) 
 
+[The pushf assembly instruction](https://www.felixcloutier.com/x86/pushf:pushfd:pushfq) 
+
 [What is context switch?]([Context switch](https://en.wikipedia.org/wiki/Context_switch)) 
 
 [A simple inline assemble tutorial](https://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html#s4) 
 
 [The stack framework - an example](http://alanclements.org/TEST_StackFrames2.pdf) 
+
+[IMG (file format)](https://en.wikipedia.org/wiki/IMG_(file_format)) 
+
+[What is a compiler?](https://en.wikipedia.org/wiki/Compiler) 
+
+[What is & how to makefile?](https://opensource.com/article/18/8/what-how-makefile)  
+
+[Simple linker example](https://sourceware.org/binutils/docs/ld/Simple-Example.html) 
+
+[Writing a Tiny x86 Bootloader](http://joebergeron.io/posts/post_two.html) 
+
+[The hexdump command]([Hexdump](https://www.geeksforgeeks.org/hexdump-command-in-linux-with-examples/)) 
+
+[What is symbol table](https://www.tutorialspoint.com/compiler_design/compiler_design_symbol_table.htm) 

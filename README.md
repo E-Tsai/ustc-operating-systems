@@ -21,4 +21,5 @@ For beginners, we recommend using the latest stable Ubuntu (18.04 in 2019). Any 
 ## **Outline**
 
 - [**Lab 1**](lab1-preparation/README.md): Warm-up. Compile a Linux kernel and create a root file system. Create boot disk with GRUB to run on QEMU. Learn GDB basics.
-- [**Lab 2**](lab2-boot2C_64bit): A simple OS with a FCFS task manager.
+- [**Lab 2**](lab2-boot2C_64bit/README.md): Starting from boot loader, realize a simple OS with a FCFS scheduler.
+- [**Lab 3**/README.md](lab3-interrupt_timer): Realize a Shortest Job First/Priority/Round Robin/Multilevel Queue scheduler based on lab 2.

@@ -1,7 +1,5 @@
 STACK_SIZE =	0x1000	# Size of heap and stack. 4KB
-
 WHITE	= 0x7			# 白色，用于输出字符，为字符颜色
-
 VGA_START	= 0xb8000
 
 /* ===== code32 =========================== */
@@ -76,14 +74,14 @@ to_main:
 shut_down:	
 	jmp	shut_down	# Never here
 	
-#上下文切换
-#上下文示意图：
-#（高地址）CS：IP
-#（低地址）
+# 上下文切换
+# 上下文示意图：
+# （高地址）CS：IP
+# （低地址）
   .global CTX_SW
 CTX_SW: 
 	pushf 
-  pusha
+  	pusha
 	movl prevTSK_StackPtr,%eax
 	movl %esp, (%eax)
 	movl nextTSK_StackPtr, %esp
