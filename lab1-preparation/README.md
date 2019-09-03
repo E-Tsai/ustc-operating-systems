@@ -9,7 +9,7 @@ Participants are expected to:
 - Get a feeling of working on Linux.
 - Understand some basic OS concepts, and be able to answer the following questions:
   * [What is a kernel?](https://en.wikipedia.org/wiki/Kernel_(operating_system)) 
-  * [What is initial ramdisk? ](https://en.wikipedia.org/wiki/Initial_ramdisk) 
+  * [What is the initial ramdisk? ](https://en.wikipedia.org/wiki/Initial_ramdisk) 
   * [What is a boot disk?](https://en.wikipedia.org/wiki/Boot_disk) 
   * [What are block devices?](https://en.wikipedia.org/wiki/Device_file#Block_devices) 
   * [What is a loop device?](https://en.wikipedia.org/wiki/Loop_device) 
@@ -99,7 +99,7 @@ Kernel: arch/x86/boot/bzImage is ready  (#1)
 
 > [bzImage](https://en.wikipedia.org/wiki/Vmlinux#bzImage) means "big zImage". This format was developed to overcome this limitation by splitting the kernel over discontiguous memory regions.
 
-**Root file system**‌
+**Initial Root File System**‌
 
 Prepare a simple c program (`hello.c`).
 
@@ -121,7 +121,7 @@ int main(int argc,  const char ** argv){
 gcc -static hello.c -o init
 ```
 
-Create a [root file system](https://developer.ibm.com/articles/l-initrd/):
+Create a [initrd](https://developer.ibm.com/articles/l-initrd/):
 
 > The *initial RAM disk (initrd)* is an initial root file system that is mounted prior to when the real root file system is available. The initrd is bound to the kernel and loaded as part of the kernel boot procedure. The kernel then mounts this initrd as part of the two-stage boot process to load the modules to make the real file systems available and get at the real root file system.
 
@@ -148,7 +148,7 @@ Copy binary to target directory:
 cp init rootfs/.
 ```
 
-Create console and ram disk for the root file system and corresponding i-nodes: 
+Create console and ram disk for the initrd and corresponding i-nodes: 
 
 ```shell
 sudo mkdir rootfs/dev
@@ -446,7 +446,7 @@ Now you can list source code at GDB breakpoints or use
 
 [Linux initial RAM disk (initrd) overview](https://developer.ibm.com/articles/l-initrd/) 
 
-[What is initial ramdisk? ](https://en.wikipedia.org/wiki/Initial_ramdisk) 
+[What is the initial ramdisk? ](https://en.wikipedia.org/wiki/Initial_ramdisk) 
 
 [What is a boot disk?](https://en.wikipedia.org/wiki/Boot_disk) 
 
