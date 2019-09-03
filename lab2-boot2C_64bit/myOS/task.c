@@ -1,191 +1,170 @@
-#include<stdio.h>
-#include"myOS.h"
-//声明
-void initTskBody(void);
-void Idle(void);
-void tskEnd(void);
-//extern void CTX_SW(unsigned long*prevSP,unsigned long*nextSP);//声明切换上下文汇编程序
-//0x66f60524 in ?? ()
-#define TCB_SIZE 100
-#define STACK_SIZE 1000
-#define IDLE 1
-#define Ready 2
-#define RUNNING 3
-#define GIVEUP 4
-unsigned long stack1[TCB_SIZE][STACK_SIZE];//二维数组 每个任务一个堆栈
-void CTX_SW(unsigned long *prevSP,unsigned long *nextSP)
-{
-	asm
-	(
-		"pusha\n\t"
-		"movl %%esp, %0\n\t" 
-		"movl %1, %%esp\n\t" 
-		"popa\n\t"
-		"ret"
-		:
-		:"m"(prevSP),"m"(nextSP)
-	);
-}
-typedef struct myTCB   //任务控制块 保存任务堆栈指针 还可以加状态
-{
-	unsigned int pid;
-	unsigned int state;
-	unsigned long *ptrStack;
-	struct myTCB* next;
-}myTCB;
-//就绪队列
-myTCB* tcb;//新的tcb
-myTCB tcbq[TCB_SIZE];
-myTCB* RearPtr = NULL;//尾部TCB
-myTCB* HeadPtr = NULL;//头部TCB
-//运行
-myTCB* CurrentPtr = NULL;//当前指针指向的TCB,正在运行
-//idletcb
-//myTCB idletcb,inittcb;
-int EnterQ(myTCB *tcb1)
-{
-	//入队
-	if(HeadPtr==NULL)
-	{
-		HeadPtr = tcb1;
-		RearPtr = tcb1;
-		//tcb->pre = NULL;
-		tcb1->next = NULL;
-	}
-	else
-	{
-		tcb1->next = NULL;
-		tcb1->pid = RearPtr->pid+1;
-		//tcb->pre = RearPtr;
-		RearPtr->next = tcb1;
-		RearPtr = tcb1;
-	}
-	return 0;
+#include "myOS.h"
+
+void rqFCFSInit(myTCB* idleTsk) {
+	rqFCFS.head = (void*)0;	
+	rqFCFS.tail = (void*)0;	
+	rqFCFS.idleTsk = idleTsk;
 }
 
-myTCB* DeleteQ(void)
-{
-	//出队:最前面一个
-	myTCB* pre = HeadPtr;
-	HeadPtr = HeadPtr->next;
-	return pre;
-}
-//栈初始化  保存任务的上下文信息
-unsigned long* stack;
-/*void stack_init(unsigned long** stk,void (*task)(void))
-{
-	*(*stk)--=(unsigned long)0x08;
-	*(*stk)--=(unsigned long)task;
-	*(*stk)--=(unsigned long)0xAAAAAAAA;
-	*(*stk)--=(unsigned long)0xCCCCCCCC;
-	*(*stk)--=(unsigned long)0xDDDDDDDD;
-	*(*stk)--=(unsigned long)0xBBBBBBBB;
-	*(*stk)--=(unsigned long)0x44444444;
-	*(*stk)--=(unsigned long)0x55555555;
-	*(*stk)--=(unsigned long)0x66666666;
-	*(*stk)= (unsigned long)0x77777777;
-}*/
-
-//任务创建：由于使用FIFO算法，应该把TCB挂到队列上
-int createTsk(void(*task)(void))
-{
-	if(tcb->pid ==0)
-	{
-	if(HeadPtr==NULL)
-		tcb->pid = 1;
-	else
-		tcb->pid = RearPtr->pid+1;
-	stack = (stack1[tcb->pid-1]+999);
-	*stack--=(unsigned long)0x08;
-	*stack--=(unsigned long)task;
-	*stack--=(unsigned long)0xAAAAAAAA;
-	*stack--=(unsigned long)0xCCCCCCCC;
-	*stack--=(unsigned long)0xDDDDDDDD;
-	*stack--=(unsigned long)0xBBBBBBBB;
-	*stack--=(unsigned long)0x44444444;
-	*stack--=(unsigned long)0x55555555;
-	*stack--=(unsigned long)0x66666666;
-	*stack= (unsigned long)0x77777777;
-	//stack_init(stack,task);
-	tcb->ptrStack = stack;//信息
-	if(task==Idle)
-		tcb->state = IDLE;
-	else
-		tcb->state = Ready;
-	//stack_init(&(tcb.ptrStack),task);//pc指向task
-	EnterQ(tcb);
-	if(tcb->pid % TCB_SIZE == 0)
-		tcb = tcbq + TCB_SIZE - 1;
-	else 
-		tcb--;
-	}
-	return 0;
+int rqFCFSIsEmpty(void){
+	return ((rqFCFS.head==(void*)0) && (rqFCFS.tail==(void*)0));
 }
 
-int destroyTsk(myTCB*giveup_tcb)
-{
-	giveup_tcb->pid = 0;
-	giveup_tcb->state = GIVEUP;
-	return 1;
-}
-//FIFO
-int schedule()
-{
-		/*//如果切换的是idle，那就把idletcb放到就绪队列尾部
-		if(CurrentPtr->ptrStack == idletcb.ptrStack)
-			EnterQ(&idletcb);*/
-		if(HeadPtr!=NULL)
-		{
-			
-		unsigned long*prevSP = CurrentPtr->ptrStack;
-		destroyTsk(CurrentPtr);
-		CurrentPtr = DeleteQ();
-		if(CurrentPtr->state!=IDLE)
-			CurrentPtr->state = RUNNING;
-		unsigned long*nextSP = CurrentPtr->ptrStack;
-		CTX_SW(prevSP,nextSP);
-		//切换上下文
-		}
-		else if(CurrentPtr->state !=IDLE)
-		{
-			createTsk(Idle);
-			Idle();
-		}
-		return 0;
+myTCB * nextFCFSTsk(void) {
+	if (rqFCFSIsEmpty())
+		return rqFCFS.idleTsk;
+	else return rqFCFS.head;
 }
 
-void osStart(void)
-{
-	//initial:let currentptr point to the IDLE task;
-	//idle
-	//stack_init(&(idletcb.ptrStack),Idle);
-	//init
-	//stack= (unsigned long*)0xffffffc0; 
-	//unsigned long* test;
-	//*test = (unsigned long*)0xffffffc0;
-	//*test =(unsigned long)0x08;
-	//stack = stack1;
-	tcb = tcbq + TCB_SIZE - 1;
-	for(int i = 0;i<TCB_SIZE;i++)
-	{
-		tcbq[i].pid = 0;
-		tcbq[i].state = GIVEUP;
-	}
-	createTsk(initTskBody);
-	//createTsk(Idle);
-	CurrentPtr = HeadPtr;
-	CurrentPtr->state = RUNNING;
-	HeadPtr = HeadPtr->next;
-	initTskBody();
+/*
+ *tskEnqueueFCFS: insert into the tail node
+ */
+void tskEnqueueFCFS(myTCB *tsk){
+
+	if (rqFCFSIsEmpty()) {
+		rqFCFS.head = tsk;
+	} else 
+		rqFCFS.tail->next = tsk;
+
+	rqFCFS.tail = tsk;
 }
 
-void Idle(void)
-{
-	while(1)
-		schedule();
+/*
+ *tskDequeueFCFS: delete the first node
+ */
+void tskDequeueFCFS(myTCB *tsk){
+	rqFCFS.head = rqFCFS.head->next;
+
+	if (tsk == rqFCFS.tail) 
+		rqFCFS.tail = (void*)0;	
 }
 
-void tskEnd(void)
-{
+void tskStart(myTCB *tsk){
+	tsk->state = TSK_RDY;
+	tskEnqueueFCFS(tsk);
+}
+
+void tskEnd(void){
+	tskDequeueFCFS(currentTsk);
+	destroyTsk(currentTsk->tcbIndex);
+}
+
+void stack_init(unsigned long** stk,void (*task)(void)){
+  *(*stk)-- = (unsigned long) 0x08;        // CS 高地址
+  *(*stk)-- = (unsigned long) task;     // eip
+  *(*stk)-- = (unsigned long) 0xAAAAAAAA;  // EAX 
+  *(*stk)-- = (unsigned long) 0xCCCCCCCC;  // ECX
+  *(*stk)-- = (unsigned long) 0xDDDDDDDD;  // EDX 
+  *(*stk)-- = (unsigned long) 0xBBBBBBBB;  // EBX
+  *(*stk)-- = (unsigned long) 0x44444444;  // ESP
+  *(*stk)-- = (unsigned long) 0x55555555;  // EBP
+  *(*stk)-- = (unsigned long) 0x66666666;  // ESI
+  *(*stk) = (unsigned long) 0x77777777;  // EDI 低地址    
+
+}
+
+/* createTsk
+ * tskBody():
+ * return value: taskIndex or, if failed, -1
+ */
+int createTsk(void (*tskBody)(void)){
+
+	myTCB * allocated=firstFreeTsk;
+
+	if (firstFreeTsk == (void*)0) return -1;
+
+	firstFreeTsk = allocated->next;		
+	allocated->next = (void*)0;
+
+	stack_init(&(allocated->stkTop),tskBody);
+	tskStart(allocated);
+
+	return allocated->tcbIndex;
+}
+
+/* destroyTsk
+ * takIndex:
+ * return value: void
+ */
+void destroyTsk(int takIndex){
+
+	// back to freelist
+	tcbPool[takIndex].next = firstFreeTsk;
+	firstFreeTsk = &tcbPool[takIndex]; 
 	schedule();
+}
+
+void context_switch(myTCB *prevTsk, myTCB *nextTsk){	
+	prevTSK_StackPtr = prevTsk->stkTop;
+	nextTSK_StackPtr = nextTsk->stkTop;
+	CTX_SW(prevTSK_StackPtr,nextTSK_StackPtr);
+}
+
+void scheduleFCFS(void){
+	myTCB * prevTsk;
+	prevTsk = currentTsk;
+	currentTsk = nextFCFSTsk();
+	context_switch(prevTsk,currentTsk);
+}
+
+void schedule(void){
+	scheduleFCFS();
+}
+
+void tskIdleBdy(void){
+
+	char *message1 = "********************************\0";
+  char *message2 = "*        Idle  Idle !          *\0";
+	int row=0,col=0;
+
+	row=22; col=4; put_chars(message1,WHITE,&row,&col);
+	row++; col=4; put_chars(message2,WHITE,&row,&col);
+	row++; col=4; put_chars(message1,WHITE,&row,&col);
+
+	while(1); // {//do something else	schedule();	}
+}
+
+void TaskManagerInit(void){
+	int i;
+	myTCB *thisTCB;
+	
+	for (i=0;i<TASK_NUM;i++){
+	  thisTCB=&tcbPool[i];
+
+		// init index
+		thisTCB->tcbIndex = i;
+		
+		// init freelist
+		if (i==TASK_NUM-1)
+			thisTCB->next = (myTCB *)0;
+		else
+			thisTCB->next = &tcbPool[i+1];
+
+		// init stkTop
+		thisTCB->stkTop = thisTCB->stack + STACK_SIZE -1;
+	}
+
+	//task0:idle, create and start
+	idleTsk = &tcbPool[0];
+	stack_init(&(idleTsk->stkTop),tskIdleBdy);	
+	rqFCFSInit(idleTsk);
+
+	firstFreeTsk = &tcbPool[1];
+	
+	//task1:init
+  createTsk(initTskBody);	
+}
+
+unsigned long BspContextBase[STACK_SIZE];
+unsigned long *BspContext;
+
+void osStart(void){
+	TaskManagerInit();
+	
+	//start multitasking
+  BspContext = BspContextBase + STACK_SIZE -1;
+	prevTSK_StackPtr = BspContext;
+	currentTsk = nextFCFSTsk();
+	nextTSK_StackPtr = currentTsk->stkTop;
+  CTX_SW(prevTSK_StackPtr,nextTSK_StackPtr);
 }

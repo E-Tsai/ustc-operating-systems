@@ -2,9 +2,9 @@ ASM_FLAGS= -m32 --pipe -Wall -fasm -g -O1 -fno-stack-protector
 C_FLAGS = -m32 -fno-stack-protector -g
 
 all: myOS
+include bootsect/Makefile
 include myOS/Makefile
 include userApp/Makefile
-include bootsect/Makefile
 
 OS_OBJS       = ${MYOS_OBJS} ${USER_APP_OBJS}
 

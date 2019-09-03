@@ -11,6 +11,7 @@ In the following experiments, we are going to build a simple bootable operating 
   * [BIOS interrupt call](https://en.wikipedia.org/wiki/BIOS_interrupt_call);
   * [Bootloader](https://en.wikipedia.org/wiki/Booting#First-stage_boot_loader);
   * [Global Descriptor Table (GDT)](https://en.wikipedia.org/wiki/Global_Descriptor_Table);
+  * [Memory Segmentation](https://en.wikipedia.org/wiki/X86_memory_segmentation) 
   * [Task Control Block](https://en.wikipedia.org/wiki/Task_Control_Block)/[Process control block](https://en.wikipedia.org/wiki/Process_control_block);
   * [Multitasking](https://en.wikipedia.org/wiki/Computer_multitasking);
   * [Stack-based memory allocation](https://en.wikipedia.org/wiki/Stack-based_memory_allocation);
@@ -42,11 +43,9 @@ In the following experiments, we are going to build a simple bootable operating 
 
 ## Requirements
 
-* In `myOS/start32.S`, add assembly code for context switch;
+* In `myOS/start32.S`, add assembly code for context switch (provided in next section);
 
-* In `myOS/`, add `task.c` or other C files for `osStart()` (task management/scheduling);
-
-* In `myOS/Makefile`, add rules to compile newly added files;
+* In `myOS/`, add `task.c` or other C files to define  `osStart()` (task management/scheduling);
 
 * In `myOS/`, add `myOS.h` (this file name cannot be changed) to list following interfaces between our operating system  `userApp`:
 
@@ -82,6 +81,8 @@ In the following experiments, we are going to build a simple bootable operating 
 
   ...and implement these interfaces.
 
+* In `myOS/Makefile`, add rules to compile newly added files;
+
 * Replace old `userApp` with new provided testing code.
 
 * Provide a code diagram for this project.
@@ -90,7 +91,7 @@ In the following experiments, we are going to build a simple bootable operating 
 
 ### Environment
 
-* Compiling tools: gcc (>=4.8), ld;
+* Compiling tools: gcc (>=4.8), ld (>=2.0);
 * Emulator: qemu-system-i386 (32-bit).
 
 ### Code structure
@@ -244,13 +245,11 @@ You're expected to add assembly code for context switch in `myOS/start32.S`, it 
 ```asm
 .global CTX_SW
 CTX_SW: 
-	pushf 
   	pusha
 	movl prevTSK_StackPtr,%eax
 	movl %esp, (%eax)
 	movl nextTSK_StackPtr, %esp
 	popa 
-	popf
 	ret
 ```
 
@@ -269,12 +268,10 @@ void CTX_SW(unsigned long *prevTSK_StackPtr,unsigned long *nextTSK_StackPtr)
 {
 	asm
 	(
-        "pushf\n\t"
 		"pusha\n\t"
 		"movl %%esp, %0\n\t" 
 		"movl %1, %%esp\n\t" 
 		"popa\n\t"
-        "popf\n\t"
 		"ret"
 		:
 		:"m"(prevTSK_StackPtr),"m"(nextTSK_StackPtr)
@@ -282,7 +279,19 @@ void CTX_SW(unsigned long *prevTSK_StackPtr,unsigned long *nextTSK_StackPtr)
 }
 ```
 
-You are expected to implement TCB in `myOS/task.c`, pseudocode:
+Now we've entered C. Starting from `myMain(void)` in `userApp/main.c`, we're going to implement a simple FCFS scheduler. We provide several simple printing functions:
+
+* `void clear_screen(void);`
+* `void put_char(char c, char color, int row, int col);`
+* `void put_chars(char *msg, char color, int *_row, int *_col);`
+
+...check out [this page](https://wiki.osdev.org/Printing_To_Screen) to understand how they work.
+
+In `myOS/init.c`, there are 3 simple tasks which prints information to VGA, and a `initTskBody()` to create them. 
+
+As it is implied from the code we provided, you're going to implement a simple FCFS scheduler in `myOS/task.c`. 
+
+You are expected to implement a TCB structure in `myOS/task.c`. It can be something like:
 
 ```c
 typedef struct myTCB{
@@ -293,7 +302,7 @@ typedef struct myTCB{
 };
 ```
 
-Implement  `void osStart(void)` , `int createTsk(void (*tskBody)(void))`, `void tskEnd(void)`, `void initTskBody(void)` in `myOS/task.c`. To initialize stack:
+Implement  `void osStart(void)` , `int createTsk(void (*tskBody)(void))`, `void tskEnd(void)`, `void initTskBody(void)` in `myOS/task.c`. To initialize stack in `createTsk()` :
 
 ```c
 unsigned long* stack;
@@ -312,7 +321,11 @@ void stack_init(unsigned long** stk,void (*task)(void)){
 }
 ```
 
-*hint: When to initialize a task-specific stack?[The pushf assembly instruction](https://www.felixcloutier.com/x86/pushf:pushfd:pushfq) *
+*hint: When to initialize a task-specific stack?*
+
+
+
+http://www.cs.ucr.edu/~vahid/rios/
 
 To compile this newly added source code, add the following to `myOS/Makefile`: 
 
@@ -408,6 +421,8 @@ Some GDB commands:
 
 [What is a linker?](https://www.geeksforgeeks.org/compiler-design-linker/) 
 
+[Memory Segmentation](https://en.wikipedia.org/wiki/X86_memory_segmentation) 
+
 [What is a Task Control Block](https://en.wikipedia.org/wiki/Task_Control_Block)/[Process control block?](https://en.wikipedia.org/wiki/Process_control_block) 
 
 [What is a multitasking OS?](https://en.wikipedia.org/wiki/Computer_multitasking) 
@@ -461,3 +476,5 @@ Some GDB commands:
 [The hexdump command]([Hexdump](https://www.geeksforgeeks.org/hexdump-command-in-linux-with-examples/)) 
 
 [What is symbol table](https://www.tutorialspoint.com/compiler_design/compiler_design_symbol_table.htm) 
+
+[Printing to screen](https://wiki.osdev.org/Printing_To_Screen) 

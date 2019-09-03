@@ -73,7 +73,7 @@ rm_print_string_end:
 	.p2align 4
 start16:
 
-	cli  # close interrupts
+	cli  # 关中断
 
 	movw	%cs, %ax
 	movw	%ax, %ds  # set the rest of real mode registers
@@ -107,13 +107,13 @@ get_any_key1:
 
 	call	get_key
 
-
+#在进入保护模式前，先加载OS
 load_img0:
 	movw	$loading_OS_message, %si
 	movb	$WHITE, %ah
 	movl	$(5*80), %edx
 	call	rm_print_string
-# 在进入保护模式前，先加载OS
+
 # 加载OS
 load_img:
 	call reset_floppy
@@ -126,7 +126,7 @@ load_ok:
 	movl	$(5*80+13), %edx
 	call	rm_print_string
 
-# 进入保护模式
+#进入保护模式
 to_protect_mode:
 	movw	$to_protect_mode_message, %si
 	movb	$WHITE, %ah

@@ -44,8 +44,8 @@ void put_chars(char *msg, char color, int *_row, int *_col){
 //=========================my Main===========================================
 int myMain(void){
 	int row=0,col=0;
-  char *message1 = "********************************\0";
-  char *message2 = "*        HELLO WORLD!          *\0";  
+	char *message1 = "********************************\0";
+	char *message2 = "*        HELLO WORLD!          *\0";  
 
 	clear_screen();
 	row=0; col=4; put_chars(message1,WHITE,&row,&col);
@@ -55,7 +55,7 @@ int myMain(void){
 	osStart();
 
 	//never here  
-  row=8; col=4; put_chars(message1,WHITE,&row,&col);
+	row=8; col=4; put_chars(message1,WHITE,&row,&col);
 	row++; col=4; put_chars(message2,WHITE,&row,&col);
 	row++; col=4; put_chars(message1,WHITE,&row,&col);	
 	return 0;

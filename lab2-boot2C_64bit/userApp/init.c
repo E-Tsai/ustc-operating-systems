@@ -1,6 +1,6 @@
 /* init.c */
 #include "../myOS/myOS.h"
-#include "userApp.h"
+
 char *message1 = "********************************\0";
 int row=0,col=0;	
 
@@ -32,8 +32,7 @@ void myTSK2(void){
 }
 
 void initTskBody(void){
-
-	char *message2 = "*        INIT  INIT !          *\0";
+  char *message2 = "*        INIT  INIT !          *\0";
 	row=4; col=4; put_chars(message1,WHITE,&row,&col);
 	row++; col=4; put_chars(message2,WHITE,&row,&col);
 	row++; col=4; put_chars(message1,WHITE,&row,&col);
@@ -41,6 +40,5 @@ void initTskBody(void){
 	createTsk(myTSK0);
 	createTsk(myTSK1);
 	createTsk(myTSK2);
-	tskEnd();  
-  // init end
+	tskEnd();  // init end
 }
