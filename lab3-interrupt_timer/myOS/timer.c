@@ -19,8 +19,7 @@ void getWallClock(int *h, int *m, int *s){
 
 #ifndef __TICK_HOOK__
 #define __TICK_HOOK__
-void tick_hook(void) {
-};
+void tick_hook(void) {};
 #endif
 
 void tick(void){

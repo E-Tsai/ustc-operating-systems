@@ -7,14 +7,14 @@ IMG_NAME=output/a_boot2C.img
 #	exit
 #fi
 
-echo "compile into binary..."
+echo "Compiling into Binary..."
 echo "make clean"
 make clean
 
 echo "make"
 make
 
-echo "build boot floppy"
+echo "Building boot floppy..."
 sudo dd if=output/start16.bin of=${IMG_NAME} bs=512 count=1
 sudo dd if=output/myOS.bin of=${IMG_NAME} bs=512 seek=1
 

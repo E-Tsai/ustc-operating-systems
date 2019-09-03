@@ -40,6 +40,10 @@ int myMain(void){
 	
 	doSomeTestBefore();
 
+	//prior settings
+	setSysScheduler(SCHEDULER_FCFS);//PRIORITY); //RR); //PRIORITY0); //SJF); FCFS);
+	//setSysSchedulerPara(SCHED_RR_SLICE,1000);
+
 	osStart();
 
 	//never here    

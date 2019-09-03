@@ -17,11 +17,11 @@
 #define SCHED_PRIO    0x0030
 #define SCHED_RR      0x0040
 #define SCHED_RT_FCFS 0x0050
-#define SCHED_RT_RR   0x0070
+#define SCHED_RT_RR   0x0050
 #define SCHED_IDLE    0x0060
 
-#define SCHED_RR_SLICE		100
-#define SCHED_RT_RR_SLICE	200
+#define SCHED_RR_SLICE		0x1000
+#define SCHED_RT_RR_SLICE	0x2000
 struct scheduler {
     unsigned int type;  
 
@@ -32,11 +32,11 @@ struct scheduler {
     void (*createTsk_hook)(myTCB* created);  //if set, will be call in createTsk (before tskStart)
     void (*tick_hook)(void);  //if set, tick_hook will be called every tick
 };
-//冗余
+
 unsigned int getSysScheduler(void);
 void setSysScheduler(unsigned int what);
 
-unsigned int getSysSchedulerPara(unsigned int who);
+void getSysSchedulerPara(unsigned int who, unsigned int *para);
 void setSysSchedulerPara(unsigned int who, unsigned int para);
 
 /* wrapped interfaces */

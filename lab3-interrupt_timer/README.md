@@ -148,6 +148,8 @@ void osStart(void){
 	init8253();
 	// set scheduler parameters
 	enable_interrupt();
+    
+    //////////////////////////////////////////////
 	// print relavant info
 	TaskManagerInit();
 	
@@ -161,7 +163,9 @@ You are supposed to add information of task parameters, scheduler type, queues f
 
 Read `tick_hook()` in `userApp/main.c` and implement RR algorithm.
 
-‌Provide corresponding test cases for each algorithm implemented, explain your test case design.
+‌Provide corresponding test cases for each algorithm implemented, explain your test case design. 
+
+Check out the head file references and `userApp` replacement we provided.
 
 ## References
 
