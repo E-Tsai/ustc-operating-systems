@@ -22,7 +22,7 @@ In the following experiments, we are going to build a simple bootable operating 
   * What is a [Makefile](https://opensource.com/article/18/8/what-how-makefile)? How does it work?
   * What is a [linker](https://en.wikipedia.org/wiki/GNU_linker)? How does it work?
   * What is a [Executable and Linkable Format (ELF)](https://elinux.org/Executable_and_Linkable_Format_(ELF))?
-  * What is a [IMG](https://en.wikipedia.org/wiki/IMG_(file_format))?
+  * What is an [IMG](https://en.wikipedia.org/wiki/IMG_(file_format))?
 
 ## Contents
 
@@ -478,3 +478,5 @@ Some GDB commands:
 [What is symbol table](https://www.tutorialspoint.com/compiler_design/compiler_design_symbol_table.htm) 
 
 [Printing to screen](https://wiki.osdev.org/Printing_To_Screen) 
+
+[The Linux Kernel](https://www.tldp.org/LDP/tlk/tlk-toc.html) 

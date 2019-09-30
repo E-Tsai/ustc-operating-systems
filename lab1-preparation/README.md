@@ -1,27 +1,27 @@
 # Lab 1: Getting Ready
 
-*Warm-up. Compile a Linux kernel and create a root file system. Create boot disk with GRUB to run on QEMU. Learn GDB basics.*
+*Warm-up experiment.* 
 
-## **Purpose**‌
+# **Purpose** 
 
 Participants are expected to:
 
 - Get a feeling of working on Linux.
 - Understand some basic OS concepts, and be able to answer the following questions:
-  * [What is a kernel?](https://en.wikipedia.org/wiki/Kernel_(operating_system)) 
-  * [What is the initial ramdisk? ](https://en.wikipedia.org/wiki/Initial_ramdisk) 
-  * [What is a boot disk?](https://en.wikipedia.org/wiki/Boot_disk) 
-  * [What are block devices?](https://en.wikipedia.org/wiki/Device_file#Block_devices) 
-  * [What is a loop device?](https://en.wikipedia.org/wiki/Loop_device) 
-  * [What is BIOS?](https://en.wikipedia.org/wiki/BIOS) 
-  * [What is MBR?](https://en.wikipedia.org/wiki/Master_boot_record) 
+  - [What is a kernel?](https://en.wikipedia.org/wiki/Kernel_(operating_system))
+  - [What is the initial ramdisk?](https://en.wikipedia.org/wiki/Initial_ramdisk)
+  - [What is a boot disk?](https://en.wikipedia.org/wiki/Boot_disk)
+  - [What are block devices?](https://en.wikipedia.org/wiki/Device_file#Block_devices)
+  - [What is a loop device?](https://en.wikipedia.org/wiki/Loop_device)
+  - [What is BIOS?](https://en.wikipedia.org/wiki/BIOS)
+  - [What is MBR?](https://en.wikipedia.org/wiki/Master_boot_record)
 - Understand the **booting process of Linux kernel**.
 - Learn some **GDB basics**.
 - **Know how to google**.
 
-...through the process of completing this warm-up experiment.‌
+...through the process of completing this warm-up experiment.
 
-## **Contents**
+# **Contents**
 
 - Install [QEMU](https://www.qemu.org/), the hard virtualization emulator. 
 - Compile Linux [kernel](https://en.wikipedia.org/wiki/Kernel_(operating_system)).
@@ -29,11 +29,11 @@ Participants are expected to:
 - Create a GRUB [boot disk](https://en.wikipedia.org/wiki/Boot_disk).
 - Learn how to use [GDB](https://www.tutorialspoint.com/gnu_debugger/what_is_gdb.htm) on QEMU.
 
-## **Instructions**
+# **Instructions**
 
 *Participants of this course are not required to have programming experience on Linux. We understand that there might be an information overload and will try our best to explain all the new concepts along the way. However, we strongly encourage and recommend you to take a deep dive and answer your own questions that occur in the process of completing this warm-up tutorial.*
 
-### **Run Linux kernel on QEMU**
+## **Run Linux kernel on QEMU**
 
 **Install QEMU & compile Linux kernel**
 
@@ -508,3 +508,4 @@ Now you can list source code at GDB breakpoints or use
 
 [The BIOS/MBR Boot Process](https://neosmart.net/wiki/mbr-boot-process/) 
 
+[Shell Scripting](http://www.learnlinux.org.za/courses/build/shell-scripting/index.html) 
